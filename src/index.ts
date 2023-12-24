@@ -1,4 +1,5 @@
 import "./assets/main.css";
+import { TStatus, IState, ISnake, ICoords } from "./types";
 
 const gameMenu = document.getElementById("menu");
 const score = document.getElementById("score");
@@ -10,16 +11,32 @@ let fps = 5;
 let fpsInterval = 1000 / fps;
 let startFraime = Date.now();
 
-type TStatus = "new" | "game" | "gameover"
-
-interface IState extends Record<string, any> {
-    status: TStatus
-    score: number;
-}
+const grid = 20;
+const centerX = Math.floor((canvas.width / 2 / grid)) * grid - grid;
+const centerY = Math.floor((canvas.height / 2 / grid)) * grid - grid;
 
 const initialState: IState = {
     status: "new",
     score: 0,
+}
+
+let state: IState = initialState;
+let fruits: ICoords[] = [];
+
+const snake: ISnake = {
+    x: centerX,
+    y: centerY,
+    dx: grid,
+    dy: 0,
+    tail: [{ x: centerX, y: centerY }, { x: centerX - grid, y: centerY }],
+}
+
+const getRandomFruit = () => {
+    const apple = { 
+        x: Math.floor((Math.random() * (canvas.width)/ grid)) * grid ,
+        y: Math.floor((Math.random() * (canvas.height) / grid)) * grid,
+    };
+    return apple; 
 }
 
 const stateHandler = {
@@ -44,38 +61,6 @@ const stateHandler = {
           }
     }
 };
-
-let state = new Proxy<IState>(initialState, stateHandler);
-
-const grid = 20;
-const centerX = Math.floor((canvas.width / 2 / grid)) * grid - grid;
-const centerY = Math.floor((canvas.height / 2 / grid)) * grid - grid;
-
-const snake = {
-    x: centerX,
-    y: centerY,
-    dx: grid,
-    dy: 0,
-    tail: [{ x: centerX, y: centerY }, { x: centerX - grid, y: centerY }],
-}
-
-console.log("snake: ", snake)
-
-const getRandomFruit = () => {
-    const apple = { 
-        x: Math.floor((Math.random() * (canvas.width)/ grid)) * grid ,
-        y: Math.floor((Math.random() * (canvas.height) / grid)) * grid,
-    };
-    return apple; 
-}
-
-let fruits = [
-    getRandomFruit(),
-]
-
-export const gameInit = () => {
-    console.log("game init");
-}
 
 const gameLoop = () => {
     let now = Date.now();
@@ -113,7 +98,7 @@ const gameLoop = () => {
         if (fruits.some((item) => item.x === snake.x && item.y === snake.y)) {
             console.log("bam!");
             state.score = state.score + 1;
-            snake.tail.unshift();
+            snake.tail.unshift({x: snake.x, y: snake.y});
             fruits = [getRandomFruit()];
         }
     }
@@ -140,11 +125,13 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-export const startGame = () => {
+const startGame = () => {
+    state = new Proxy<IState>(initialState, stateHandler);
+    fruits.push(getRandomFruit())
     gameLoop();
     state.status = "game";
+    console.log("game inited");
+    newGame?.removeEventListener("mousedown", startGame);
 }
 
-newGame?.addEventListener("mousedown", () => {
-    startGame();
-})
+newGame?.addEventListener("mousedown", startGame);
