@@ -101,12 +101,12 @@ const stateHandler = {
         if (snake.y > canvas.height) state.status = "gameover";
         if (snake.y < 0) state.status = "gameover";
         
+        snake.tail.unshift({ x: snake.x, y: snake.y });
+        snake.tail.pop();
         ctx.fillRect(snake.x, snake.y, grid, grid);
         snake.tail.forEach((item) => {
             ctx.fillRect(item.x, item.y, grid, grid)
         });
-        snake.tail.unshift({ x: snake.x, y: snake.y });
-        snake.tail.pop();
 
         if (fruits.some((item) => item.x === snake.x && item.y === snake.y)) {
             console.log("bam!");
@@ -141,10 +141,11 @@ const gameControlKeysHandler = (e: KeyboardEvent) => {
 const gameStartHandler = (e: KeyboardEvent) => {
     if (e.code === "Space") {
         snake = { ...initialSnake };
+        snake.tail = [ ...initialSnake.tail ];
         state.score = 0;
         state.status = "game";
         fruits = [getRandomFruit()];
-        gameLoop();
+        requestAnimate = requestAnimationFrame(gameLoop);
         console.log("game inited");
         window.removeEventListener("keydown", gameStartHandler);
         window.addEventListener("keydown", gameControlKeysHandler);
