@@ -10,9 +10,7 @@ export interface ICoords {
     y: number;
 }
 
-export interface ISnake {
-    x: number;
-    y: number;
+export interface ISnake extends ICoords {
     dx: number;
     dy: number;
     tail: ICoords[];

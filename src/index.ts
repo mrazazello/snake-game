@@ -3,7 +3,7 @@ import { TStatus, IState, ISnake, ICoords } from "./types";
 
 const gameMenu = document.getElementById("menu");
 const score = document.getElementById("score");
-const newGame = document.getElementById("newGame");
+const gameOver = document.getElementById("gameover");
 const canvas = <HTMLCanvasElement> document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -20,16 +20,18 @@ const initialState: IState = {
     score: 0,
 }
 
-let state: IState = initialState;
 let fruits: ICoords[] = [];
+let requestAnimate: number;
 
-const snake: ISnake = {
+const initialSnake: ISnake = {
     x: centerX,
     y: centerY,
     dx: grid,
     dy: 0,
     tail: [{ x: centerX, y: centerY }, { x: centerX - grid, y: centerY }],
 }
+
+let snake = { ...initialSnake };
 
 const getRandomFruit = () => {
     const apple = { 
@@ -42,8 +44,17 @@ const getRandomFruit = () => {
 const stateHandler = {
     set(target: IState, prop: string, value: TStatus | number) {
         if (prop in target) {
-            if (value === "game" && gameMenu) {
+            if (value === "new") {
+                gameOver.style.display = "none";
+            }
+            if (value === "game") {
                 gameMenu.style.display = "none";
+                gameOver.style.display = "none";
+            }
+            if (value === "gameover") {
+                gameOver.style.display = "block";
+                cancelAnimationFrame(requestAnimate);
+                window.addEventListener("keydown", gameStartHandler);
             }
             if (prop === "score" && score) {
                 score.innerHTML = value.toString();
@@ -57,15 +68,17 @@ const stateHandler = {
         if (prop in target) {
             return target[prop];
           } else {
-            return 0;
-          }
-    }
-};
+              return 0;
+            }
+        }
+    };
 
-const gameLoop = () => {
-    let now = Date.now();
-    let elapsed = now - startFraime;
-    requestAnimationFrame(gameLoop);
+    let state: IState = new Proxy<IState>(initialState, stateHandler);
+
+    const gameLoop = () => {
+        let now = Date.now();
+        let elapsed = now - startFraime;
+    requestAnimate = requestAnimationFrame(gameLoop);
     if (!ctx) return;
     
     if (elapsed > fpsInterval) {
@@ -81,12 +94,12 @@ const gameLoop = () => {
         ctx.fillStyle = "green";
         
         snake.x += snake.dx;
-        if (snake.x > canvas.width) snake.x = 0;
-        if (snake.x < 0) snake.x = canvas.width - grid;
+        if (snake.x > canvas.width) state.status = "gameover";
+        if (snake.x < 0) state.status = "gameover";
         
         snake.y += snake.dy;
-        if (snake.y > canvas.height) snake.y = 0;
-        if (snake.y < 0) snake.y = canvas.height - grid;
+        if (snake.y > canvas.height) state.status = "gameover";
+        if (snake.y < 0) state.status = "gameover";
         
         ctx.fillRect(snake.x, snake.y, grid, grid);
         snake.tail.forEach((item) => {
@@ -127,10 +140,11 @@ const gameControlKeysHandler = (e: KeyboardEvent) => {
 
 const gameStartHandler = (e: KeyboardEvent) => {
     if (e.code === "Space") {
-        state = new Proxy<IState>(initialState, stateHandler);
-        fruits.push(getRandomFruit())
-        gameLoop();
+        snake = { ...initialSnake };
+        state.score = 0;
         state.status = "game";
+        fruits = [getRandomFruit()];
+        gameLoop();
         console.log("game inited");
         window.removeEventListener("keydown", gameStartHandler);
         window.addEventListener("keydown", gameControlKeysHandler);
