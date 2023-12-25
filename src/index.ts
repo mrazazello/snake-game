@@ -104,8 +104,8 @@ const gameLoop = () => {
     }
 }
 
-const gameControlHandler = (e: KeyboardEvent) => {
-    switch (e.key) {
+const gameControlKeysHandler = (e: KeyboardEvent) => {
+    switch (e.code) {
         case "ArrowLeft":
            if (!snake.dx) snake.dx = - grid;
            snake.dy = 0;
@@ -125,14 +125,16 @@ const gameControlHandler = (e: KeyboardEvent) => {
     }
 }
 
-const startGame = () => {
-    state = new Proxy<IState>(initialState, stateHandler);
-    fruits.push(getRandomFruit())
-    gameLoop();
-    state.status = "game";
-    console.log("game inited");
-    newGame?.removeEventListener("mousedown", startGame);
-    window.addEventListener('keydown', gameControlHandler);
+const gameStartHandler = (e: KeyboardEvent) => {
+    if (e.code === "Space") {
+        state = new Proxy<IState>(initialState, stateHandler);
+        fruits.push(getRandomFruit())
+        gameLoop();
+        state.status = "game";
+        console.log("game inited");
+        window.removeEventListener("keydown", gameStartHandler);
+        window.addEventListener("keydown", gameControlKeysHandler);
+    }
 }
 
-newGame?.addEventListener("mousedown", startGame);
+window.addEventListener("keydown", gameStartHandler);
