@@ -101,8 +101,13 @@ const stateHandler = {
         if (snake.y > canvas.height) state.status = "gameover";
         if (snake.y < 0) state.status = "gameover";
         
+        if (snake.tail.some((item) => item.x === snake.x && item.y === snake.y)) {
+            state.status = "gameover";
+        }
+
         snake.tail.unshift({ x: snake.x, y: snake.y });
         snake.tail.pop();
+
         ctx.fillRect(snake.x, snake.y, grid, grid);
         snake.tail.forEach((item) => {
             ctx.fillRect(item.x, item.y, grid, grid)
