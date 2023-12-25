@@ -104,7 +104,7 @@ const gameLoop = () => {
     }
 }
 
-window.addEventListener('keydown', (e) => {
+const gameControlHandler = (e: KeyboardEvent) => {
     switch (e.key) {
         case "ArrowLeft":
            if (!snake.dx) snake.dx = - grid;
@@ -123,7 +123,7 @@ window.addEventListener('keydown', (e) => {
             snake.dx = 0;
         break;
     }
-});
+}
 
 const startGame = () => {
     state = new Proxy<IState>(initialState, stateHandler);
@@ -132,6 +132,7 @@ const startGame = () => {
     state.status = "game";
     console.log("game inited");
     newGame?.removeEventListener("mousedown", startGame);
+    window.addEventListener('keydown', gameControlHandler);
 }
 
 newGame?.addEventListener("mousedown", startGame);
