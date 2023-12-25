@@ -1,9 +1,16 @@
 import "./assets/main.css";
+
 import { TStatus, IState, ISnake, ICoords } from "./types";
+
+const soundfile = require("./assets/snarl.mp3");
+// import soundfile from "./assets/snarl.mp3";
+// console.log("file: ", soundfile)
+
 
 const gameMenu = document.getElementById("menu");
 const score = document.getElementById("score");
 const gameOver = document.getElementById("gameover");
+const scary = document.getElementById("scary");
 const canvas = <HTMLCanvasElement> document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -41,6 +48,16 @@ const getRandomFruit = () => {
     return apple; 
 }
 
+
+const showScary = () => {
+    scary.style.opacity = "1";
+    const scream = new Audio("snarl.mp3");
+    scream.play();
+    setTimeout(() => {
+        scary.style.opacity = "0";
+    }, 500)
+}
+
 const stateHandler = {
     set(target: IState, prop: string, value: TStatus | number) {
         if (prop in target) {
@@ -58,6 +75,9 @@ const stateHandler = {
             }
             if (prop === "score" && score) {
                 score.innerHTML = value.toString();
+                if (value === 5) {
+                    showScary();
+                }
             }
             target[prop] = value;
             return true;
