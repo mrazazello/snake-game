@@ -17,6 +17,7 @@ const ctx = canvas.getContext("2d");
 let fps = 5;
 let fpsInterval = 1000 / fps;
 let startFraime = Date.now();
+let requestAnimate: number;
 
 const grid = 20;
 const centerX = Math.floor((canvas.width / 2 / grid)) * grid - grid;
@@ -28,7 +29,6 @@ const initialState: IState = {
 }
 
 let fruits: ICoords[] = [];
-let requestAnimate: number;
 
 const initialSnake: ISnake = {
     x: centerX,
@@ -75,7 +75,7 @@ const stateHandler = {
             }
             if (prop === "score" && score) {
                 score.innerHTML = value.toString();
-                if (value === 5) {
+                if (value === 3) {
                     showScary();
                 }
             }

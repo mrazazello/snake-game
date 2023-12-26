@@ -84,7 +84,6 @@ canvas {
 }
 
 .scary img {
-    /* opacity: 0; */
     animation: shake 0.5s;
     
     animation-iteration-count: infinite;
